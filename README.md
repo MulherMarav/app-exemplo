@@ -137,7 +137,7 @@ docker run -d -p 8080:80 dockersamples/static-site
 ```
 - Este cenário é muito interessante quando queremos testar o funcionamento e como uma aplicação está interagindo com outras
 
-IMAGEM
+## IMAGEM
 
 * ver as imagens baixadas, quando foi criada e o tamanho
 ```
@@ -191,7 +191,7 @@ docker push [etiqueta nova]/[nome da imagem nova]:[versão]
 - Se fizemos um novo push de uma versão mais recente da imagem, o docker saberá que houve envio anteriormente e irá reaproveitar algumas camadas já existentes. Docker Hub é capaz de reutilizar as camadas já existentes também no nosso repositório remoto.
 
 
-Fluxo do docker run
+### Fluxo do docker run
 - procura a imagem localmente -> Baixa a imagem caso não encontre localmente -> Valida o hash da imagem -> Executa o container
 
 ##  PERSISTÊNCIA DE DADOS / VOLUMES
@@ -327,7 +327,7 @@ docker network create --driver bridge [nome da bridge]
 docker run -it --name [host name do container] --networking [nome da bridge888] ubuntu bash
 ```
 
-- Exemplo de um segundo bridge
+### Exemplo de um segundo bridge
 * o sleep de um dia só para manter o container em execução. Sem iniciar o terminal
 ```
 docker run -d --name pong --network minha-bridge ubuntu sleep 1d
@@ -337,7 +337,7 @@ docker run -d --name pong --network minha-bridge ubuntu sleep 1d
 ping pong
 ```
 
-- Exemplo com uma rede none 
+### Exemplo com uma rede none 
 * manter o container em execução sem travar ele, após rodar o comando, é mostrado ID completo do container
 ```
 docker run -d --network none ubuntu sleep 1d 
@@ -347,26 +347,40 @@ docker run -d --network none ubuntu sleep 1d
 docker inspect nesse ID
 ```
 
-- Exemplo com uma rede com interface em nosso host
+### Exemplo com uma rede com interface em nosso host
 * docker run -d --network host aluradocker/app-node:1.0 = esse container será executado na rede host
 ```
 docker inspect nesse ID
 ```
-* a versão 1.0 da nossa aplicação app-node executa por padrão sempre na porta 3000, então se acessar localhost:3000, conseguimos ver aplicação.
-* Porque utilizando o driver host nós estamos utilizando a mesma rede, a mesma interface do host que está hospedando esse container. Então caso tivesse alguma outra aplicação na minha porta 3000 com meu host em execução, eu não conseguiria fazer a utilização desse container dessa maneira, daria um problema de conflito de portas, porque a interface seria a mesma.
-* Qual propósito de utilizar as duas redes? 
+- a versão 1.0 da nossa aplicação app-node executa por padrão sempre na porta 3000, então se acessar localhost:3000, conseguimos ver aplicação.
+- Porque utilizando o driver host nós estamos utilizando a mesma rede, a mesma interface do host que está hospedando esse container. Então caso tivesse alguma outra aplicação na minha porta 3000 com meu host em execução, eu não conseguiria fazer a utilização desse container dessa maneira, daria um problema de conflito de portas, porque a interface seria a mesma.
+- Qual propósito de utilizar as duas redes? 
     * A rede host remove o isolamento entre o container e o sistema, enquanto a rede none remove a interface de rede.
 
 
-* Comunicando aplicação e banco
-* docker pull mongo:4.4.6 = baixar a imagem do banco 
-* docker pull aluradocker/alura-books:1.0 = baixar a imagem da aplicação 
-* docker network create --driver bridge minha-bridge = crie uma rede bridge
-* docker run -d --network minha-bridge --name meu-mongo mongo:4.4.6 = rodar o container do banco na rede. Para não travar o terminal, então deve executar em modo detached com a flag -d. A aplicação está buscando pelo host name meu-mongo, então no momento em que essa imagem da aplicação foi construída, esse arquivo estava definido dessa maneira.
-* docker run -d --network minha-bridge --name alurabooks -p 3000:8080 aluradocker/alura-books:1.0 = para aplicação é necessário fazer o mapeamento de portas e utilizar a mesma rede que o container do banco
+### Comunicando aplicação e banco
+* baixar a imagem do banco
+```
+docker pull mongo:4.4.6 
+```
+* baixar a imagem da aplicação
+```
+docker pull aluradocker/alura-books:1.0
+```
+* crie uma rede bridge
+```
+docker network create --driver bridge minha-bridge
+```
+* rodar o container do banco na rede. Para não travar o terminal, então deve executar em modo detached com a flag -d. A aplicação está buscando pelo host name meu-mongo, então no momento em que essa imagem da aplicação foi construída, esse arquivo estava definido dessa maneira
+```
+docker run -d --network minha-bridge --name meu-mongo mongo:4.4.6
+```
+* para aplicação é necessário fazer o mapeamento de portas e utilizar a mesma rede que o container do banco
     * No navegador ao acessar “localhost:3000”, que vai acessar a nossa aplicação. E ela tem um endpoint, o “/seed”, que vai popular o banco. E agora se atualizarmos a página, todos os dados do banco estão sendo carregados na nossa aplicação. Ao fazer docker stop meu-mongo, todos os dados da aplicação irão sumir
     * o papel da rede bridge é possibilitar a comunicação entre containers em um mesmo host.
-
+```
+docker run -d --network minha-bridge --name alurabooks -p 3000:8080 aluradocker/alura-books:1.0
+```
 
 ## Coordenando containers com docker-compose
 
@@ -374,43 +388,52 @@ docker inspect nesse ID
 * Então o Docker Compose vai nos auxiliar a executar, a compor, como o nome diz, diversos containers em um mesmo ambiente, através de um único arquivo.
 * O Docker Compose irá resolver o problema de executar múltiplos containers de uma só vez e de maneira coordenada, evitando executar cada comando de execução individualmente
 
-* mkdir ymls = para criar uma pasta chamada ymls
-* cd ymls = para entrar dentro da pasta 
-* code .  = para abrir o vscode
+* para criar uma pasta chamada ymls
+```
+mkdir ymls 
+```
+* para entrar dentro da pasta
+```
+cd ymls
+```
+* para abrir o vscode
+```
+code . 
+```
 * E dentro do vscode, criar um arquivo docker-compose.yml
 * Após configurar o arquivo xml, dar um docker-compose up
 * É possível ver o resultado acessando localhost:3000 e localhost:3000/seed
 * Com ctrl + c para de rodar os dois containers
 * Outros comandos:
-    * docker-compose up -d
-    * docker-compose ps
-    * docker-compose down = remove os containers e as redes
+    * ``` docker-compose up -d ```
+    * ``` docker-compose ps ```
+    * ``` docker-compose down = remove os containers e as redes ```
 
 ## O QUE FOI APRENDIDO?
 
 * Máquinas virtuais possuem camadas adicionais de virtualização em relação a um container;
 * Containers funcionam como processos no host;
 * Containers atingem isolamento através de namespaces;
-* Os recursos dos containers são gerenciados através de cgroups.
+* Os recursos dos containers são gerenciados através de cgroups;
 * O Docker Hub é um grande repositório de imagens que podemos utilizar;
 * A base dos containers são as imagens;
 * Como utilizar comandos acerca do ciclo de vida dos containers, como: docker start, para iniciar um container que esteja parado; docker stop, para parar um que esteja rodando; docker pause, para pausar um container e docker unpause para iniciar um container pausado; 
-* Conseguimos mapear portas de um container com as flags -p e -P.
+* Conseguimos mapear portas de um container com as flags -p e -P;
 * Imagens são imutáveis, ou seja, depois de baixadas, múltiplos containers conseguirão reutilizar a mesma imagem;
 * Imagens são compostas por uma ou mais camadas. Dessa forma, diferentes imagens são capazes de reutilizar uma ou mais camadas em comum entre si;
 * Podemos criar nossas imagens através de Dockerfiles e do comando docker build;
-* Para subir uma imagem no Docker Hub, utilizamos o comando docker push.
+* Para subir uma imagem no Docker Hub, utilizamos o comando docker push;
 * Quando containers são removidos, nossos dados são perdidos;
 * Podemos persistir dados em definitivo através de volumes e bind mounts;
 * Bind mounts dependem da estrutura de pastas do host;
 * Volumes são gerenciados pelo Docker;
-* Tmpfs armazenam dados em memória volátil
+* Tmpfs armazenam dados em memória volátil;
 * O docker dispõe por padrão de três redes: bridge, host e none;
 * A rede bridge é usada para comunicar containers em um mesmo host;
 * Redes bridges criadas manualmente permitem comunicação via hostname;
 * A rede host remove o isolamento de rede entre o container e o host;
 * A rede none remove a interface de rede do container;
-* Podemos criar redes com o comando docker network create
+* Podemos criar redes com o comando docker network create;
 * O Docker Compose é uma ferramenta de coordenação de containers;
 * Como iniciar containers em conjunto com o comando docker-compose up;
 * Como criar um arquivo de composição e definir instruções de containers, redes e serviços.
